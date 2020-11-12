@@ -1,3 +1,6 @@
+altair
+altair_saver
+nodejs
 numpy
 scipy
 matplotlib
@@ -10,3 +13,14 @@ cartopy
 scikit-learn
 geopandas
 intake
+intake-parquet
+r-arrow
+r-aws.s3
+r-base
+r-kableextra
+r-rmarkdown
+r-irkernel
+r-reticulate
+r-tidyverse
+pyarrow
+python-snappy
