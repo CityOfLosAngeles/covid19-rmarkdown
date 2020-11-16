@@ -1,9 +1,12 @@
 # Utility functions
 library(dplyr)
-library(arrow)
 library(zoo)
 
+YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")
+TWO_WEEKS_AGO <- format(Sys.Date()-15, "%Y-%m-%d")
 
+
+# Clean JHU case data
 prep_county <- function(df, county_name, start_date){
   df<- df %>%
     mutate(date=as.Date(date)) %>%
@@ -19,6 +22,10 @@ prep_county <- function(df, county_name, start_date){
       new_cases_avg7 = zoo::rollmean(new_cases, k = 7, fill = NA),
       new_deaths_avg7 = zoo::rollmean(new_deaths, k = 7, fill = NA),
     ) %>%
+    mutate(
+      new_cases_avg7 = round(new_cases_avg7, 2),
+      new_deaths_avg7 = round(new_deaths_avg7, 2)
+    ) %>%
     ungroup() %>%
     subset(date >= start_date)
   
@@ -26,6 +33,7 @@ prep_county <- function(df, county_name, start_date){
 }
 
 
+# Clean hospitalizations data
 prep_hospital <- function(df, county_name, start_date){
   df<- df %>%
     mutate(date=as.Date(date)) %>%
@@ -50,3 +58,4 @@ prep_hospital <- function(df, county_name, start_date){
   
   return(df)
 }
+

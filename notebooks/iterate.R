@@ -1,21 +1,38 @@
 library(rmarkdown)
 library(stringr)
 library(tidyverse)
-
-#setwd("GitHub/covid19-indicators)
+library(knitr)
 
 # create an index
-neighborhoods <- c("Echo Park", "Koreatown")
+county <- c("Los Angeles", "Orange")
 
 # create a data frame with parameters and output file names
 reports <- tibble(
-  filename = str_c(neighborhoods, "-trends", ".html"),
-  params = map(neighborhoods, ~list(neighborhood = .))
+  filename = str_c(county, ".pdf"),
+  params = map(county, ~list(county = .))
+)
+
+html_reports <- tibble(
+  filename = str_c(county, ".html"),
+  params = map(county, ~list(county = .))
 )
 
 
 # iterate render() along the tibble of parameters and file names
 reports %>%
   select(output_file = filename, params) %>%
-  pwalk(rmarkdown::render, input = "notebooks/r-neighborhood.Rmd", 
-        output_dir = "notebooks")
+  pwalk(rmarkdown::render, input = "notebooks/county-charts.Rmd", 
+        output_format = "pdf_document",
+        output_dir = "reports")
+
+
+html_reports %>%
+  select(output_file = filename, params) %>%
+  pwalk(rmarkdown::render, input = "notebooks/county-charts-html.Rmd",
+        output_format = "html_document",
+        output_dir = "reports")
+# for pdf reports  
+#   rmarkdown::render(input = "/Users/majerus/Desktop/R/auto_reporting/test/r_script_pdf.Rmd", 
+#           output_format = "pdf_document",
+#           output_file = paste("test_report_", car, Sys.Date(), ".pdf", sep=''),
+#           output_dir = "/Users/majerus/Desktop/R/auto_reporting/test/reports")
