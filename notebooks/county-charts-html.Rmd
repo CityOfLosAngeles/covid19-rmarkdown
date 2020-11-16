@@ -4,8 +4,7 @@ fontsize: 10pt
 geometry: left=1in,right=1in,top=0.35in,bottom=0.6in
 header-includes: \input{preamble.tex}
 output:
-  html_document:
-  word_document: default
+  html_document: default
   pdf_document: default
 sansfont: Lato
 urlcolor: null

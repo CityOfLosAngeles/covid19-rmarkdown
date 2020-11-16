@@ -38,19 +38,42 @@ library(scales) # formatting numbers
 library(arrow) # read parquets
 library(zoo) # moving averages
 library(reshape2)
+library(aws.s3)
+
 
 # Plotting
 library(ggplot2)
 library(ggthemes)
 library(plotly) #interactive charts
-
 ```
 
 
-```{r import-data}
+```{r test-import,eval=FALSE}
+# Read in environment variables
+#https://stackoverflow.com/questions/12291418/how-can-i-make-r-read-my-environmental-variables
+readRenviron(".env")
+Sys.getenv("AWS_ACCESS_KEY_ID",
+           "AWS_SECRET_ACCESS_KEY",
+           "AWS_DEFAULT_REGION" 
+)
 
-us_county<-read_parquet("../data/us-county-time-series.parquet", as_tibble = TRUE)
-ca_hospitalizations<-read.csv("../data/ca-hospital-and-surge-capacity.csv")
+#us_county<-read_parquet("", as_tibble = TRUE)
+save_object("jhu_covid19/us-county-time-series.parquet", 
+            file = "../data/us-county-time-series.parquet", 
+            bucket = "public-health-dashboard", 
+            overwrite=TRUE, check_region=F)
+save_object("https://public-health-dashboard.s3.amazonaws.com/jhu_covid19/us-county-time-series.parquet")
+
+
+obj<-get_object(object="jhu_covid19/us-county-time-series.csv", 
+                  bucket=bucket_name, check_region=F)
+
+df <- read_parquet("../data/us-county-time-series.parquet")
+```
+
+```{r import-data, echo=FALSE}
+us_county<-read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
 YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")
 TWO_WEEKS_AGO <- format(Sys.Date()-15, "%Y-%m-%d")
