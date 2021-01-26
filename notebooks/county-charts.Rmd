@@ -1,0 +1,108 @@
+---
+font: Lato
+fontsize: 10pt
+geometry: left=1in,right=1in,top=0.35in,bottom=0.6in
+header-includes: \input{preamble.tex}
+output:
+  pdf_document: default
+  word_document: 
+  html_document:
+sansfont: Lato
+urlcolor: null
+params:
+  county: "Los Angeles"
+  start_date: "2020-04-15"
+---
+
+\raggedright
+
+
+```{r rmarkdown-setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(dev = "cairo_pdf")
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+
+# Knit RMarkdown
+library(knitr)
+
+# Tables
+library(kableExtra)
+
+# Data Cleaning pipeline
+library(tidyverse)
+library(dplyr)
+library(scales) # formatting numbers
+library(arrow) # read parquets
+library(zoo) # moving averages
+library(reshape2)
+library(aws.s3)
+
+
+# Plotting
+library(ggplot2)
+library(ggthemes)
+library(plotly) #interactive charts
+```
+
+
+```{r test-import,eval=FALSE}
+# Read in environment variables
+#https://stackoverflow.com/questions/12291418/how-can-i-make-r-read-my-environmental-variables
+readRenviron(".env")
+Sys.getenv("AWS_ACCESS_KEY_ID",
+           "AWS_SECRET_ACCESS_KEY",
+           "AWS_DEFAULT_REGION" 
+)
+
+# Can't read directly from S3 with .env file credentials
+```
+
+```{r import-data, echo=FALSE}
+us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
+
+YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")
+TWO_WEEKS_AGO <- format(Sys.Date()-15, "%Y-%m-%d")
+
+# Chart parameters
+NAVY<-"#0A4C6A"
+MAROON<- "#F3324C"
+LIGHT_GRAY<-"#EAEBEB"
+
+```
+
+
+```{r select-parameter, echo = FALSE}
+
+source("../notebooks/r_utils.R")
+
+cases <- prep_county(us_county, params$county, params$start_date)
+
+hospitalizations <-prep_hospital(ca_hospitalizations, params$county, params$start_date)
+
+```
+
+
+## `r {params$county}` County: Charts
+
+```{r charts,echo=FALSE, fig.align="left", fig.show="hold", out.width=c("70%", "70%")}
+
+source("../notebooks/r_chart_utils.R")
+
+# Plot cases / deaths
+cases_chart<-plotCasesDeaths(cases, y_var=new_cases_avg7, 
+                line_color=NAVY, 
+                chart_title="New Cases: 7-day avg", 
+                ytitle="daily new cases")
+
+deaths_chart<-plotCasesDeaths(cases, y_var=new_deaths_avg7, 
+                line_color=MAROON, 
+                chart_title="New Deaths: 7-day avg", 
+                ytitle="daily new deaths")
+
+cases_chart
+deaths_chart
+```

@@ -1,0 +1,181 @@
+% explicitly call these packages to avoid this issue:
+% https://stackoverflow.com/questions/46080853/why-does-rendering-a-pdf-from-rmarkdown-require-closing-rstudio-between-renders?
+% utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{color}          % enables font colors
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage[normalem]{ulem}
+\usepackage[export]{adjustbox}  % enables two column images at the top
+\usepackage{makecell}           % for library(kableExtra)
+%\usepackage{tabularx}           % for library(kableExtra)
+\usepackage{geometry}
+
+% set font encoding for PDFLaTeX or XeLaTeX
+\usepackage[utf8]{inputenc}   % sets document encoding to utf8
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{memhfixc}
+\usepackage{amssymb}          % for itemized list styles
+
+% document setup
+\definecolor{clablue}{HTML}{335eac}    % defines the ITA blue color
+\usepackage{enumitem}                   % bullet alignment
+\setlist[2]{nosep}                      % sets the itemsep and parsep for all level two lists to 0
+\setenumerate{nosep}                    % sets no itemsep for enumerate lists only
+% \pagenumbering{gobble}                  % disable page numbering
+\usepackage[hang,flushmargin]{footmisc} % don't indent footnotes
+\usepackage[document]{ragged2e}         % ragged right
+\usepackage[none]{hyphenat}             % disable work breaks
+\renewcommand\thefootnote{\textcolor{clablue}{\arabic{footnote}}} % change the color of the footnote indicator
+\hypersetup{
+  colorlinks,
+  linkcolor=clablue,
+  urlcolor=clablue,
+}
+\usepackage{parskip}
+\setlength{\parskip}{0.1in}               % set paragraph spacing
+
+
+\usepackage{geometry}
+ \geometry{
+ letterpaper,
+ left=1in,
+ top=1in,
+ bottom=0.7in
+ }
+
+% urban institute logo
+\newcommand{\clalogo}[0]{
+  \begin{figure}
+    \hspace{-0.12in}
+    \includegraphics[width=1.5in]{design/cla_logo.png}
+    \includegraphics[width=1.5in]{design/ita_logo.png}
+    \vspace{0.25in}  
+    \label{fig:boat1}
+  \end{figure}
+}
+
+% contact information
+\newcommand{\contactinfo}[0]{
+  \thispagestyle{empty}
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw 
+      node[anchor=south west, minimum height=0.3in, minimum width=7.5in, text width=5in] at ($(current page.south west) + (0.45in,0.13in)$) 
+      {\begin{center}
+      \color{gray}City of Los Angeles - Information Technology Agency \space \normalsize\break
+      \color{clablue}$\blacksquare$ \space
+      \color{gray}200 N Main St \space
+      \color{clablue}$\blacksquare$ \space
+      \color{gray}Los Angeles, CA \space
+      \color{clablue}$\blacksquare$ \space
+      \color{gray}213.978.0874 \space
+      \color{clablue}$\blacksquare$ \space
+      \textcolor{clablue}{www.ita.lacity.org}
+      \end{center}
+      };
+  \end{tikzpicture}
+}
+
+% titles (14pt font)
+\newcommand{\clatitle}[1]{
+  \begin{center}
+      \textbf{\LARGE{#1}}
+  \end{center}
+}
+  
+% subtitles (12pt font)
+\newcommand{\clasubtitle}[1]{
+  \begin{center}
+    \Large{\textcolor{clablue}{#1}}
+    \vspace{0.25in}    
+  \end{center}
+}
+
+% authors (11pt font)
+\newcommand{\claauthors}[1]{
+  \begin{center}
+    \vspace{0.25in} 
+  \end{center}
+}
+
+% heading 1
+\newcommand{\claheadingone}[1]{
+  \textbf{\LARGE{\\} \large{#1}}
+}
+
+% heading 2
+\newcommand{\claheadingtwo}[1]{
+  \textbf{\textcolor{clablue}{#1}}
+}
+
+% figure label
+\newcommand{\clafigurenumber}[1]{
+  \textcolor{clablue}{\tiny{\\} \normalsize{FIGURE #1 \\}}
+}
+
+% figure title
+\newcommand{\clafiguretitle}[1]{
+  \textbf{\normalsize{#1} \\}
+}
+
+% figure source
+\newcommand{\clasource}[1]{
+  \footnotesize{\textbf{Source: }#1} \normalsize\break
+}
+
+% figure note
+\newcommand{\clanote}[1]{
+  \footnotesize{\textbf{Note: }#1} \normalsize\break
+}
+
+% table label
+\newcommand{\clatablenumber}[1]{
+  \textcolor{clablue}{\tiny{\\} \normalsize{TABLE #1 \\}}
+}
+
+% table title
+\newcommand{\clatabletitle}[1]{
+  \textbf{\normalsize{#1} \\}
+}
+
+% table sub title
+\newcommand{\clatablesubtitle}[1]{
+  \textit{\normalsize{#1} \\}
+}
+
+
+% bullet points
+\renewcommand{\labelitemi}{\color{clablue}\tiny$\blacksquare$}   % blue square
+\renewcommand{\labelitemii}{\color{clablue}\tiny$\blacksquare$}  % blue square
+\renewcommand{\labelitemiii}{\color{clablue}\tiny$\blacksquare$} % blue square
+\renewcommand{\labelitemiv}{\color{clablue}\tiny$\blacksquare$}  % blue square
+
+\newenvironment{clabullets}
+{\begin{itemize}[leftmargin=*,labelindent=0.25in,labelsep=0.1875in]
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}}
+{\end{itemize}} 
+
+% numbered list
+\newenvironment{claenumerate}
+{\begin{enumerate}[leftmargin=*,labelindent=0.25in,labelsep=0.15625in]
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}}
+{\end{enumerate}} 
+
+% eliminates top border line for the table
+\def\toprule{}
+
+% sets midline at 1pt
+\setlength{\lightrulewidth}{1pt}
