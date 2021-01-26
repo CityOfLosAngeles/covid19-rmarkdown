@@ -56,7 +56,7 @@ plotCasesHTML<-function(df, chart_title){
     geom_line(colour=NAVY, size=0.75) +
     scale_color_fivethirtyeight() +
     scale_x_date(date_labels = "%m-%d", 
-                 date_breaks = "2 weeks") +
+                 date_breaks = "1 months") +
     scale_y_continuous(label=comma) + 
     theme_minimal() +
     theme(legend.position="none", 

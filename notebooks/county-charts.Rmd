@@ -51,15 +51,18 @@ library(ggthemes)
 us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
 ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
-YESTERDAY_DATE <- format(Sys.Date()-1,"%-m/%-d/%Y")
-TWO_WEEKS_AGO <- format(Sys.Date()-15, "%-m/%-d/%Y")
+# Call parameters from our utils files
+source("../notebooks/r_utils.R")
+YESTERDAY_DATE <-YESTERDAY_DATE
+TWO_WEEKS_AGO <- TWO_WEEKS_AGO
 
 
+# Call parameters from utils files
+source("../notebooks/r_chart_utils.R")
 # Chart parameters
-NAVY<-"#0A4C6A"
-MAROON<- "#F3324C"
-LIGHT_GRAY<-"#EAEBEB"
-
+NAVY<-NAVY
+MAROON<- MAROON
+LIGHT_GRAY<-LIGHT_GRAY
 ```
 
 
