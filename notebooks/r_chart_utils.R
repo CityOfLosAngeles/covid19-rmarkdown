@@ -22,43 +22,16 @@ plotCasesDeaths<-function(df, y_var, line_color, chart_title, ytitle){
     labs(x = "date", 
          y = eval(arg$ytitle), 
          title=eval(arg$chart_title)) + 
-    geom_line(colour=eval(arg$line_color)) +
     geom_area(data = df %>% subset(date >= TWO_WEEKS_AGO),
-              fill = LIGHT_GRAY) +
-    #Draw a line again otherwise the shading removes some of the line
-    geom_line(colour=eval(arg$line_color)) +
+              fill = LIGHT_GRAY) +    
+    geom_line(colour=eval(arg$line_color), size=0.75) +
     scale_color_fivethirtyeight() +
     scale_x_date(date_labels = "%m-%d", 
                  date_breaks = "1 months") +
+    scale_y_continuous(label=comma) + 
     theme_minimal() +
     theme(legend.position="none", 
-    )
-  
-  return(chart)
-}
-
-
-plotCasesHTML<-function(df, chart_title){
-  
-  arg <- match.call()
-  
-  chart <- ggplot(df, 
-                  aes(x = date, 
-                      y = new_cases_avg7,
-                  )) +
-    labs(x = "date", 
-         y = "daily new cases", 
-         title=eval(arg$chart_title)) + 
-    geom_line(colour=NAVY) +
-    geom_area(data = df %>% subset(date >= TWO_WEEKS_AGO),
-              fill = LIGHT_GRAY) +
-    #Draw a line again otherwise the shading removes some of the line
-    geom_line(colour=NAVY) +
-    scale_color_fivethirtyeight() +
-    scale_x_date(date_labels = "%m-%d", 
-                 date_breaks = "2 weeks") +
-    theme_minimal() +
-    theme(legend.position="none", 
+          axis.text.x = element_text(angle=90, hjust=0)
     )
   
   return(chart)
@@ -66,6 +39,7 @@ plotCasesHTML<-function(df, chart_title){
 
 
 # HTML version of cases
+
 plotCasesHTML<-function(df, chart_title){
   
   arg <- match.call()
@@ -75,16 +49,19 @@ plotCasesHTML<-function(df, chart_title){
                       y = new_cases_avg7,
                   )) +
     labs(x = "date", 
-         y = "daily new cases", 
+         y = "new cases (7-day rolling avg)", 
          title=eval(arg$chart_title)) + 
     geom_area(data = df %>% subset(date >= TWO_WEEKS_AGO),
               fill = LIGHT_GRAY) +
-    geom_line(data = df, colour=NAVY, size=1) +
+    geom_line(colour=NAVY, size=0.75) +
     scale_color_fivethirtyeight() +
     scale_x_date(date_labels = "%m-%d", 
-                 date_breaks = "1 months") +
+                 date_breaks = "2 weeks") +
+    scale_y_continuous(label=comma) + 
     theme_minimal() +
-    theme(legend.position="none")
+    theme(legend.position="none", 
+          axis.text.x = element_text(angle=90, hjust=0)
+    )
   
   return(chart)
 }
@@ -99,16 +76,19 @@ plotDeathsHTML<-function(df, chart_title){
                       y = new_deaths_avg7,
                   )) +
     labs(x = "date", 
-         y = "daily new deaths", 
+         y = "new deaths (7-day rolling avg)", 
          title=eval(arg$chart_title)) + 
     geom_area(data = df %>% subset(date >= TWO_WEEKS_AGO),
               fill = LIGHT_GRAY) +
-    geom_line(data = df, colour=MAROON, size=1) +
+    geom_line(data = df, colour=MAROON, size=0.75) +
     scale_color_fivethirtyeight() +
     scale_x_date(date_labels = "%m-%d", 
                  date_breaks = "1 months") +
+    scale_y_continuous(label=comma) + 
     theme_minimal() +
-    theme(legend.position="none")
+    theme(legend.position="none", 
+          axis.text.x = element_text(angle=90, hjust=0)
+          )
   
   return(chart)
 }

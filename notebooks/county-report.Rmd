@@ -1,0 +1,130 @@
+---
+font: Lato
+fontsize: 10pt
+geometry: left=1in,right=1in,top=0.35in,bottom=0.6in
+header-includes: \input{preamble.tex}
+output:
+  html_document: default
+  pdf_document: default
+sansfont: Lato
+urlcolor: null
+params:
+  county: "Los Angeles"
+  start_date: "2020-04-15"
+---
+
+\raggedright
+
+
+```{r rmarkdown-setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(dev = "cairo_pdf")
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+
+# Knit RMarkdown
+library(knitr)
+
+# Tables
+library(kableExtra)
+
+# Data Cleaning pipeline
+library(tidyverse)
+library(dplyr)
+library(scales) # formatting numbers
+library(arrow) # read parquets
+library(zoo) # moving averages
+library(reshape2)
+
+# Plotting
+library(ggplot2)
+library(ggthemes)
+library(plotly) #interactive charts
+
+```
+
+
+```{r import-data}
+
+us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
+
+YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")
+TWO_WEEKS_AGO <- format(Sys.Date()-15, "%Y-%m-%d")
+
+# Chart parameters
+NAVY<-"#0A4C6A"
+MAROON<- "#F3324C"
+LIGHT_GRAY<-"#EAEBEB"
+
+```
+
+
+```{r chart-functions, echo=FALSE, out.width=c("50%", "50%")}
+
+plot_charts <- function(df, county, start_date, chart_type="cases"){
+  source("../notebooks/r_utils.R")
+  
+  cases_df <- prep_county(df, county, start_date)
+  
+  source("../notebooks/r_chart_utils.R")
+  
+  
+  if (chart_type=="cases"){
+    # Adjust chart title to show county name
+    chart_title = paste(county, "County: New Cases")
+
+    chart_html<-plotCasesHTML(cases_df, 
+                  chart_title=chart_title
+                  )
+  
+    chart_html <- chart_html %>% ggplotly(
+      tooltip=c("date", "new_cases_avg7")
+    )
+    
+    return(chart_html)
+    }
+
+  if (chart_type=="deaths"){
+    # Adjust chart title to show county name
+    chart_title = paste(county, "County: New Deaths")
+
+    chart_html<-plotDeathsHTML(cases_df, 
+                  chart_title=chart_title
+                  )
+  
+    chart_html <- chart_html %>% ggplotly(
+      tooltip=c("date", "new_deaths_avg7)")
+    )
+    
+    return(chart_html)
+    }
+  
+  }
+
+```
+
+
+
+```{r make-charts, echo = FALSE}
+county_list = c("Alameda", "Los Angeles")
+
+for (c in county_list){
+  #cat("## This is a heading for ", i, "\n")
+  #cat("<!-- This is a comment for ", i, "-->\n")  
+  cases_chart <- plot_charts(us_county, c, params$start_date, "cases")
+  deaths_chart <-plot_charts(us_county, c, params$start_date, "deaths")
+  
+  cases_chart
+  deaths_chart
+  }
+
+
+
+#As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r #comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
+
+#https://stackoverflow.com/questions/38733403/edit-labels-in-tooltip-for-plotly-maps-using-ggplot2-in-r
+```
+
