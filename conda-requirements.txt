@@ -25,3 +25,4 @@ r-tidyverse
 pyarrow
 python-snappy
 r-ggthemes
+r-plotly

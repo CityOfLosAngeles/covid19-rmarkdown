@@ -48,8 +48,8 @@ library(plotly) #interactive charts
 
 ```{r import-data}
 
-us_county<-read_parquet("../data/us-county-time-series.parquet", as_tibble = TRUE)
-ca_hospitalizations<-read.csv("../data/ca-hospital-and-surge-capacity.csv")
+us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
 YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")
 TWO_WEEKS_AGO <- format(Sys.Date()-15, "%Y-%m-%d")

@@ -5,7 +5,7 @@ geometry: left=1in,right=1in,top=0.35in,bottom=0.6in
 header-includes: \input{preamble.tex}
 output:
   pdf_document: default
-  word_document: default
+  word_document: 
   html_document:
 sansfont: Lato
 urlcolor: null
@@ -57,22 +57,11 @@ Sys.getenv("AWS_ACCESS_KEY_ID",
            "AWS_DEFAULT_REGION" 
 )
 
-#us_county<-read_parquet("", as_tibble = TRUE)
-save_object("jhu_covid19/us-county-time-series.parquet", 
-            file = "../data/us-county-time-series.parquet", 
-            bucket = "public-health-dashboard", 
-            overwrite=TRUE, check_region=F)
-save_object("https://public-health-dashboard.s3.amazonaws.com/jhu_covid19/us-county-time-series.parquet")
-
-
-obj<-get_object(object="jhu_covid19/us-county-time-series.csv", 
-                  bucket=bucket_name, check_region=F)
-
-df <- read_parquet("../data/us-county-time-series.parquet")
+# Can't read directly from S3 with .env file credentials
 ```
 
 ```{r import-data, echo=FALSE}
-us_county<-read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
 ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
 YESTERDAY_DATE <- format(Sys.Date()-1,"%Y-%m-%d")

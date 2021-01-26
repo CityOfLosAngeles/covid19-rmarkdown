@@ -50,7 +50,7 @@ prep_hospital <- function(df, county_name, start_date){
     ) %>%
     ungroup() %>%
     subset(date >= start_date) %>%
-    melt(id.vars = c("county", "fips", "date"), 
+    reshape2::melt(id.vars = c("county", "fips", "date"), 
          measure.vars = c("hospitalized_avg7", "icu_avg7"),
          value.name="num") %>%
     mutate(variable = ifelse(as.character(variable) == "hospitalized_avg7", "All COVID-Hospitalized", 
