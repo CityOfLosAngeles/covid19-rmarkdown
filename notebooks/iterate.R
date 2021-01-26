@@ -16,7 +16,7 @@ reports <- tibble(
 # iterate render() along the tibble of parameters and file names
 reports %>%
   select(output_file = filename, params) %>%
-  pwalk(rmarkdown::render, input = "notebooks/county-charts.Rmd", 
+  pwalk(rmarkdown::render, input = "notebooks/ca-report", 
         output_format = "pdf_document",
         output_dir = "reports")
 
