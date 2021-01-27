@@ -103,7 +103,7 @@ plot_charts <- function(df, county, start_date, chart_type="cases"){
 ```
 
 
-```{r make-charts, echo = FALSE}
+```{r make-charts, echo = FALSE, results = 'asis'}
 county_list = c("Alameda", "Los Angeles")
 
 # Loop makes ggplotly disappear as output
@@ -111,7 +111,7 @@ county_list = c("Alameda", "Los Angeles")
 plotlist = list()
 
 for (c in county_list) {
-    
+
     cases_chart <- plot_charts(us_county, c, params$start_date, "cases") 
     
     deaths_chart <- plot_charts(us_county, c, params$start_date, "deaths") 
@@ -128,9 +128,9 @@ for (c in county_list) {
       layout(title = paste(c, "County: New Cases and New Deaths"))
 
     plotlist[[c]] = ggplotly(chart)
+    
 }
 htmltools::tagList(setNames(plotlist, NULL))
-
 
 
 ```
