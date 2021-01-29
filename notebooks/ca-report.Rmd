@@ -63,8 +63,6 @@ source("../notebooks/r_chart_utils.R")
 NAVY<-NAVY
 MAROON<- MAROON
 LIGHT_GRAY<-LIGHT_GRAY
-
-
 ```
 
 

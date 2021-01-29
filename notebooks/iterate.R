@@ -22,7 +22,7 @@ reports <- tibble(
 # iterate render() along the tibble of parameters and file names
 reports %>%
   select(output_file = filename, params) %>%
-  pwalk(rmarkdown::render, input = "notebooks/A-county-charts.Rmd", 
+  pwalk(rmarkdown::render, input = "notebooks/county-charts.Rmd", 
         output_format = "pdf_document",
         output_dir = "reports")
 
@@ -35,20 +35,20 @@ html_reports <- tibble(
 
 html_reports %>%
   select(output_file = filename, params) %>%
-  pwalk(rmarkdown::render, input = "notebooks/B-county-charts-html.Rmd", 
+  pwalk(rmarkdown::render, input = "notebooks/county-charts-html.Rmd", 
         output_format = "html_document",
         output_dir = "reports")
 
 
 # Just render 1 report, don't need the pwalk
-rmarkdown::render(input = "notebooks/C-ca-report.Rmd",
+rmarkdown::render(input = "notebooks/ca-report.Rmd",
                   output_format = "html_document",
                   output_dir = "reports", 
-                  output_file = "county-report.html"
+                  output_file = "ca-report.html"
                   )
 
 
-rmarkdown::render(input = "notebooks/D-sample-report.Rmd",
+rmarkdown::render(input = "notebooks/sample-report.Rmd",
                   output_format = "pdf_document",
                   output_dir = "reports", 
                   output_file = "sample-report.pdf"

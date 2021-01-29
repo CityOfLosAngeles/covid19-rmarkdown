@@ -85,14 +85,18 @@ subset_df <-cases %>%
 
 ```
 
-# TITLE
+# Markdown Header 1
 
-## Subtitle
+## Markdown Header 2
 
+### Markdown Header 3
+
+#### Markdown Header 4
+
+**bold** or *italic* or just regular words
 
 \clatitle{Daily Coronavirus Report}
-\clasubtitle{params$county}
-\claauthors{Tiffany Chu}
+\clasubtitle{Subtitle}
 
 
 ## `r {params$county}` County

@@ -117,7 +117,7 @@ deaths_chart<-plotCasesDeaths(cases, y_var=new_deaths_avg7,
 \clafigurenumber{1}
 \clafiguretitle{figure title!}
 
-```{r cases-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="70%"}
+```{r cases-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="50%"}
 
 cases_chart
 ```
@@ -127,7 +127,7 @@ cases_chart
 
 \clafigurenumber{2}
 
-```{r deaths-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="70%"}
+```{r deaths-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="50%"}
 
 deaths_chart
 ```
