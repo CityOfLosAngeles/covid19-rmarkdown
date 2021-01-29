@@ -16,6 +16,7 @@ params:
 \raggedright
 
 
+
 ```{r rmarkdown-setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
@@ -76,8 +77,31 @@ hospitalizations <-prep_hospital(ca_hospitalizations, params$county, params$star
 
 ```
 
+```{r get-caption, echo = FALSE}
 
-## `r {params$county}` County: New Cases
+subset_df <-cases %>% 
+  subset(date ==YESTERDAY_DATE) %>%
+  select(c("date", "cases", "deaths"))
+
+```
+
+# Markdown Header 1
+
+## Markdown Header 2
+
+### Markdown Header 3
+
+#### Markdown Header 4
+
+**bold** or *italic* or just regular words
+
+\clatitle{Daily Coronavirus Report}
+\clasubtitle{Subtitle}
+
+
+## `r {params$county}` County
+
+As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
 
 ```{r plot-cases, echo=FALSE}
 source("../notebooks/r_chart_utils.R")
@@ -92,8 +116,6 @@ cases_html %>% ggplotly(
 ```
 
 
-## `r {params$county}` County: New Deaths
-
 ```{r plot-deaths, echo=FALSE}
 
 deaths_html<-plotDeathsHTML(cases, 
@@ -103,3 +125,5 @@ deaths_html %>% ggplotly(
   tooltip=c("date", "new_deaths_avg7")
 )
 ```
+
+\contactinfo{}

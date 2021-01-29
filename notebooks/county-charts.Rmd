@@ -77,6 +77,10 @@ hospitalizations <-prep_hospital(ca_hospitalizations, params$county, params$star
 ```
 
 
+
+\clatitle{Daily Coronavirus Report}
+\clasubtitle{Report by: Tiffany Chu}
+
 ## `r {params$county}` County: COVID-19 Trends
 
 
@@ -86,10 +90,10 @@ subset_df <-cases %>%
   subset(date ==YESTERDAY_DATE) %>%
   select(c("date", "cases", "deaths"))
 
-
 ```
 
 As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
+
 
 
 ```{r charts,echo=FALSE, fig.align="left", fig.show="hold", out.width=c("70%", "70%")}
@@ -100,14 +104,34 @@ source("../notebooks/r_chart_utils.R")
 
 cases_chart<-plotCasesDeaths(cases, y_var=new_cases_avg7, 
                 line_color=NAVY, 
-                chart_title=paste(params$county, "County: New Cases"), 
+                # params$county won't evaluate here, so instead, grab from the df
+                chart_title=paste(cases$county[1], "County: New Cases"), 
                 ytitle="daily new cases")
 
 deaths_chart<-plotCasesDeaths(cases, y_var=new_deaths_avg7, 
                 line_color=MAROON, 
-                chart_title=paste(params$county, "County: New Deaths"), 
+                chart_title=paste(cases$county[1], "County: New Deaths"), 
                 ytitle="daily new deaths")
+```
+
+\clafigurenumber{1}
+\clafiguretitle{figure title!}
+
+```{r cases-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="50%"}
 
 cases_chart
+```
+
+\clasource{Johns Hopkins University}
+
+
+\clafigurenumber{2}
+
+```{r deaths-chart,echo=FALSE, fig.align="left", fig.show="hold", out.width="50%"}
+
 deaths_chart
 ```
+
+
+
+\contactinfo{}

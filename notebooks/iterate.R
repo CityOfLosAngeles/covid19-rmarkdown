@@ -1,7 +1,13 @@
+#install.packages(c("ggthemes", "plotly"))
+
 library(rmarkdown)
 library(stringr)
 library(tidyverse)
 library(knitr)
+
+# Running this `iterate.R` allows us to create an individual report for each county
+# and give it a separate name, and specify which directory the output file goes to.
+# If we just click the `knit` button, our output will end up in the same directory.
 
 # create an index
 county <- c("Los Angeles", "Alameda")
@@ -16,7 +22,7 @@ reports <- tibble(
 # iterate render() along the tibble of parameters and file names
 reports %>%
   select(output_file = filename, params) %>%
-  pwalk(rmarkdown::render, input = "notebooks/ca-report", 
+  pwalk(rmarkdown::render, input = "notebooks/county-charts.Rmd", 
         output_format = "pdf_document",
         output_dir = "reports")
 
@@ -35,13 +41,18 @@ html_reports %>%
 
 
 # Just render 1 report, don't need the pwalk
-rmarkdown::render(input = "notebooks/county-report.Rmd",
+rmarkdown::render(input = "notebooks/ca-report.Rmd",
                   output_format = "html_document",
                   output_dir = "reports", 
-                  output_file = "county-report.html"
+                  output_file = "ca-report.html"
                   )
 
 
+rmarkdown::render(input = "notebooks/sample-report.Rmd",
+                  output_format = "pdf_document",
+                  output_dir = "reports", 
+                  output_file = "sample-report.pdf"
+                  )
 
 # for pdf reports  
 #   rmarkdown::render(input = "/Users/majerus/Desktop/R/auto_reporting/test/r_script_pdf.Rmd", 
