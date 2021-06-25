@@ -58,3 +58,24 @@ prep_hospital <- function(df, county_name, start_date){
   
   return(df)
 }
+
+
+# Clean vaccinations data
+prep_vaccinations <- function(df, county_name){
+  df <- df %>% 
+    mutate(date=as.Date(administered_date)) %>%
+    subset(county==county_name) %>%
+    select(c("date", "county", "demographic_category", "demographic_value",
+             
+             "est_population", "est_age_12plus_pop", 
+             "cumulative_at_least_one_dose", "cumulative_fully_vaccinated")) %>%
+    rename(partial_vax = cumulative_at_least_one_dose , 
+           fully_vax = cumulative_fully_vaccinated) %>%
+    arrange(county, date) %>%
+    mutate(
+      pct_partial_vax = partial_vax / est_age_12plus_pop,
+      pct_fully_vax = fully_vax / est_age_12plus_pop
+    ) 
+  
+  return(df)
+}

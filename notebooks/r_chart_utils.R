@@ -94,4 +94,33 @@ plotDeathsHTML<-function(df, chart_title){
 }
 
 
+plotVaxHTML<-function(df, chart_title){
+  arg <- match.call()
+  
+  chart <- ggplot(df %>% subset(variable == "pct_fully_vax"), 
+                  aes(x = date, 
+                      y = pct,
+                      color = demographic_value
+                  )) +
+    labs(x = "date", 
+         y = "percent", 
+         title=eval(arg$chart_title)) + 
+    geom_line() +
+    scale_color_calc() +
+    scale_x_date(date_labels = "%m-%d", 
+                 date_breaks = "1 months") +
+    scale_y_continuous(label=comma) + 
+    ylim(0, 1.0) +
+    theme_minimal() +
+    theme(legend.position = "none",
+      axis.text.x = element_text(angle=90, hjust=0)
+          )
+  
+  return(chart)
+}
+
+
+
+
+
 
