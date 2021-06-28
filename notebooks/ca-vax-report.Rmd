@@ -10,7 +10,7 @@ sansfont: Lato
 urlcolor: null
 params:
   county: "Los Angeles"
-  start_date: "2020-04-15"
+  start_date: "2021-01-01"
 ---
 
 \raggedright
@@ -23,10 +23,13 @@ knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(dev = "cairo_pdf")
 options(knitr.kable.NA = "")
 options(kableExtra.latex.load_packages = FALSE)
+
 # Knit RMarkdown
 library(knitr)
+
 # Tables
 library(kableExtra)
+
 # Data Cleaning pipeline
 library(tidyverse)
 library(dplyr)
@@ -34,6 +37,7 @@ library(scales) # formatting numbers
 library(arrow) # read parquets
 library(zoo) # moving averages
 library(reshape2)
+
 # Plotting
 library(ggplot2)
 library(ggthemes)
@@ -43,12 +47,18 @@ library(htmltools) #for ggplotly to work with loop
 
 
 ```{r import-data}
-us_county<-arrow::read_parquet("../data/us-county-time-series.parquet", as_tibble=TRUE)
+COUNTY_DEMOGRAPHICS_URL = "https://data.chhs.ca.gov/dataset/e283ee5a-cf18-4f20-a92c-ee94a2866ccd/resource/71729331-2f09-4ea4-a52f-a2661972e146/download/covid19vaccinesbycountybydemographic.csv"
+
+
+ca_vaccinations<-read.csv(COUNTY_DEMOGRAPHICS_URL)
 ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
+
 # Call parameters from our utils files
 source("../notebooks/r_utils.R")
 YESTERDAY_DATE <-YESTERDAY_DATE
 TWO_WEEKS_AGO <- TWO_WEEKS_AGO
+
+
 # Call parameters from utils files
 source("../notebooks/r_chart_utils.R")
 # Chart parameters
@@ -59,7 +69,26 @@ LIGHT_GRAY<-LIGHT_GRAY
 
 
 ```{r chart-functions, echo=FALSE, out.width=c("50%", "50%")}
-plot_charts <- function(df, county, start_date, chart_type="cases"){
+# chart_types = c("Age Group", "Race/Ethnicity", "VEM Quartile")
+plot_charts <- function(df, county, chart_type="Race/Ethnicity"){
+  source("../notebooks/r_utils.R")
+  
+  vax_df <- prep_vaccinations(df, county)
+  
+  source("../notebooks/r_chart_utils.R")
+
+  subset_df <- vax_df %>% 
+    subset(demographic_category==chart_type) %>%
+    reshape2::melt(id.vars = c("county", "date",
+                               "demographic_category", "demographic_value"), 
+                   measure.vars = c("pct_partial_vax", "pct_fully_vax"),
+                   value.name="pct")
+  
+  chart_html <- plotVaxHTML(subset_df, chart_title="")
+  return(chart_html)
+}
+
+plot_cases_deaths_charts <- function(df, county, start_date, chart_type="cases"){
   source("../notebooks/r_utils.R")
   
   cases_df <- prep_county(df, county, start_date)
@@ -70,14 +99,17 @@ plot_charts <- function(df, county, start_date, chart_type="cases"){
   if (chart_type=="cases"){
     # Adjust chart title to show county name
     #chart_title = paste(county, "County: New Cases")
+
     chart_html<-plotCasesHTML(cases_df, 
                   chart_title=""
                   )
       
     }
+
   if (chart_type=="deaths"){
     # Adjust chart title to show county name
     #chart_title = paste(county, "County: New Deaths")
+
     chart_html<-plotDeathsHTML(cases_df, 
                   chart_title=""
                   )
@@ -85,37 +117,47 @@ plot_charts <- function(df, county, start_date, chart_type="cases"){
   
   return(chart_html)
   }
+
 ```
 
 
 ```{r make-charts, echo = FALSE, results = 'asis'}
-county_list = c("Alameda", "Los Angeles")
+county_list = c("Los Angeles")
+
 # Loop makes ggplotly disappear as output
 # https://github.com/ropensci/plotly/issues/570
 plotlist = list()
+
 for (c in county_list) {
-    cases_chart <- plot_charts(us_county, c, params$start_date, "cases") 
+
+    race_chart <- plot_charts(ca_vaccinations, c, "Race/Ethnicity") 
+    age_chart <- plot_charts(ca_vaccinations, c, "Age Group") 
+    vem_chart <- plot_charts(ca_vaccinations, c, "VEM Quartile") 
     
-    deaths_chart <- plot_charts(us_county, c, params$start_date, "deaths") 
-    
+
     # Options for side-by-side
     #https://stackoverflow.com/questions/1249548/side-by-side-plots-with-ggplot2
     #Cleanest ex: https://github.com/ropensci/plotly/issues/570
-    
-    
+
     #If we use subplot, then chart can only have 1 title
     # Each subplot must use annotation to get its own title
     #https://stackoverflow.com/questions/45200544/title-of-subplots-in-plotly
-    chart <- subplot(cases_chart, deaths_chart) %>% 
-      layout(title = paste(c, "County: New Cases and New Deaths"))
+    chart <- subplot(race_chart, age_chart, vem_chart) %>% 
+      layout(title = paste(c, "County: Proportion Fully Vaccinated by Subgroups"))
+
     plotlist[[c]] = ggplotly(chart)
     
 }
 htmltools::tagList(setNames(plotlist, NULL))
+
+
 ```
 
 
 ```{r , echo = FALSE}
+
 #As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r #comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
+
 #https://stackoverflow.com/questions/38733403/edit-labels-in-tooltip-for-plotly-maps-using-ggplot2-in-r
 ```
+
