@@ -23,13 +23,10 @@ knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(dev = "cairo_pdf")
 options(knitr.kable.NA = "")
 options(kableExtra.latex.load_packages = FALSE)
-
 # Knit RMarkdown
 library(knitr)
-
 # Tables
 library(kableExtra)
-
 # Data Cleaning pipeline
 library(tidyverse)
 library(dplyr)
@@ -37,7 +34,6 @@ library(scales) # formatting numbers
 library(arrow) # read parquets
 library(zoo) # moving averages
 library(reshape2)
-
 # Plotting
 library(ggplot2)
 library(ggthemes)
@@ -48,23 +44,17 @@ library(htmltools) #for ggplotly to work with loop
 
 ```{r import-data}
 COUNTY_DEMOGRAPHICS_URL = "https://data.chhs.ca.gov/dataset/e283ee5a-cf18-4f20-a92c-ee94a2866ccd/resource/71729331-2f09-4ea4-a52f-a2661972e146/download/covid19vaccinesbycountybydemographic.csv"
-
-
 ca_vaccinations<-read.csv(COUNTY_DEMOGRAPHICS_URL)
-ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
-# Call parameters from our utils files
+#vaccines<- ca_vaccinations %>%
+#  subset(county=="Los Angeles")
+
+
+#ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
+
+# Call parameters from our utils file
 source("../notebooks/r_utils.R")
 YESTERDAY_DATE <-YESTERDAY_DATE
-TWO_WEEKS_AGO <- TWO_WEEKS_AGO
-
-
-# Call parameters from utils files
-source("../notebooks/r_chart_utils.R")
-# Chart parameters
-NAVY<-NAVY
-MAROON<- MAROON
-LIGHT_GRAY<-LIGHT_GRAY
 ```
 
 
@@ -75,8 +65,8 @@ plot_charts <- function(df, county, chart_type="Race/Ethnicity"){
   
   vax_df <- prep_vaccinations(df, county)
   
+  
   source("../notebooks/r_chart_utils.R")
-
   subset_df <- vax_df %>% 
     subset(demographic_category==chart_type) %>%
     reshape2::melt(id.vars = c("county", "date",
@@ -84,80 +74,136 @@ plot_charts <- function(df, county, chart_type="Race/Ethnicity"){
                    measure.vars = c("pct_partial_vax", "pct_fully_vax"),
                    value.name="pct")
   
-  chart_html <- plotVaxHTML(subset_df, chart_title="")
+  chart_title <- subset_df[1, "demographic_category"]
+
+  chart_html <- plotVaxHTML(subset_df, chart_title=chart_title)
+  
   return(chart_html)
+  
 }
 
-plot_cases_deaths_charts <- function(df, county, start_date, chart_type="cases"){
-  source("../notebooks/r_utils.R")
-  
-  cases_df <- prep_county(df, county, start_date)
-  
-  source("../notebooks/r_chart_utils.R")
-  
-  
-  if (chart_type=="cases"){
-    # Adjust chart title to show county name
-    #chart_title = paste(county, "County: New Cases")
 
-    chart_html<-plotCasesHTML(cases_df, 
-                  chart_title=""
-                  )
-      
-    }
 
-  if (chart_type=="deaths"){
-    # Adjust chart title to show county name
-    #chart_title = paste(county, "County: New Deaths")
-
-    chart_html<-plotDeathsHTML(cases_df, 
-                  chart_title=""
-                  )
-    }
+plot_charts <- function(df, county, chart_type){
+  subset_df <- wrangle_data(df, county) %>%
+    subset(demographic_category==chart_type)
+  
+  chart_html <- plotVaxHTML(subset_df, chart_title="") %>%
+    ggplotly(tooltip = c("date", "pct"))
   
   return(chart_html)
-  }
+  
+}
 
 ```
 
 
-```{r make-charts, echo = FALSE, results = 'asis'}
+
+
+
+```{r make-charts, echo = FALSE, results = 'asis', fig.width = 20, fig.height = 100}
+wrangle_data <-function(df, county){
+  source("../notebooks/r_utils.R")
+  vax_df <- prep_vaccinations(df, county)
+  
+  source("../notebooks/r_chart_utils.R")
+  subset_df <- vax_df %>% 
+    reshape2::melt(id.vars = c("county", "date",
+                               "demographic_category", "demographic_value"), 
+                   measure.vars = c("pct_partial_vax", "pct_fully_vax"),
+                   value.name="pct")
+
+  return(subset_df)
+}
+
+
+grab_vax_pct <- function(df, demog_value, var){
+  subset_df <- df %>% 
+    subset(demographic_value==demog_value & variable==var) 
+
+    pct<-round(subset_df$pct*100, 1)
+    return(pct)
+}
+
+# Programmatically write captions
+# https://urban-institute.medium.com/using-r-markdown-to-track-and-publish-state-data-d1291bfa1ec0
+write_caption <- function(df){
+  subset_df <- wrangle_data(df, "Los Angeles") %>% subset(date==YESTERDAY_DATE)
+  
+  race_sentence <- str_glue("As of {YESTERDAY_DATE} in {county} County, ",
+                            "the race/ethnicity breakdown for fully vaccinated (partially vaccinated) is: ",
+                            "{white}% of whites ({white2}%), ",
+                            "{black}% of Blacks ({black2}%), ",
+                            "{asian}% of Asians ({asian2}%), ",
+                            "{latino}% of Latinos ({latino2}%). ",
+                            county = subset_df$county,
+                            white = grab_vax_pct(subset_df, "White", "pct_fully_vax"),
+                            black = grab_vax_pct(subset_df, "Black or African American", "pct_fully_vax"),
+                            asian = grab_vax_pct(subset_df, "Asian", "pct_fully_vax"),
+                            latino = grab_vax_pct(subset_df, "Latino", "pct_fully_vax"),
+                            white2 = grab_vax_pct(subset_df, "White", "pct_partial_vax"),
+                            black2 = grab_vax_pct(subset_df, "Black or African American", "pct_partial_vax"),
+                            asian2 = grab_vax_pct(subset_df, "Asian", "pct_partial_vax"),
+                            latino2 = grab_vax_pct(subset_df, "Latino", "pct_partial_vax")
+                      )
+  
+  age_sentence <- str_glue("The age group breakdown is: ",
+                           "{y65}% of 65+ yrs ({y65p}%), ",
+                           "{y50}% of 50-64 yrs ({y50p}%), ",
+                           "{y18}% of 18-49 yrs ({y18p}%), ",
+                           "{y12}% of 12-17 yrs ({y12p}%). ",
+                           y65 = grab_vax_pct(subset_df, "65+", "pct_fully_vax"),
+                           y50 = grab_vax_pct(subset_df, "50-64", "pct_fully_vax"),
+                           y18 = grab_vax_pct(subset_df, "18-49", "pct_fully_vax"),
+                           y12 = grab_vax_pct(subset_df, "12-17", "pct_fully_vax"),
+                           y65p = grab_vax_pct(subset_df, "65+", "pct_partial_vax"),
+                           y50p = grab_vax_pct(subset_df, "50-64", "pct_partial_vax"),
+                           y18p = grab_vax_pct(subset_df, "18-49", "pct_partial_vax"),
+                           y12p = grab_vax_pct(subset_df, "12-17", "pct_partial_vax")
+                      )
+  
+
+  caption <- paste0(race_sentence, age_sentence)[1]
+  
+  return(caption)
+}
+
+
+write_caption(ca_vaccinations)
+```
+
+
+
+
+```{r loop-charts, echo = FALSE, results = 'asis', fig.width = 20, fig.height = 100}
 county_list = c("Los Angeles")
 
 # Loop makes ggplotly disappear as output
 # https://github.com/ropensci/plotly/issues/570
 plotlist = list()
-
 for (c in county_list) {
-
     race_chart <- plot_charts(ca_vaccinations, c, "Race/Ethnicity") 
     age_chart <- plot_charts(ca_vaccinations, c, "Age Group") 
     vem_chart <- plot_charts(ca_vaccinations, c, "VEM Quartile") 
     
-
     # Options for side-by-side
     #https://stackoverflow.com/questions/1249548/side-by-side-plots-with-ggplot2
     #Cleanest ex: https://github.com/ropensci/plotly/issues/570
-
     #If we use subplot, then chart can only have 1 title
     # Each subplot must use annotation to get its own title
     #https://stackoverflow.com/questions/45200544/title-of-subplots-in-plotly
-    chart <- subplot(race_chart, age_chart, vem_chart) %>% 
+    chart <- subplot(race_chart, age_chart, vem_chart, 
+                     nrows=3) %>% 
       layout(title = paste(c, "County: Proportion Fully Vaccinated by Subgroups"))
-
-    plotlist[[c]] = ggplotly(chart)
+   
+    plotlist[[c]] = ggplotly(chart) 
     
 }
 htmltools::tagList(setNames(plotlist, NULL))
-
-
 ```
 
 
 ```{r , echo = FALSE}
-
 #As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r #comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
-
 #https://stackoverflow.com/questions/38733403/edit-labels-in-tooltip-for-plotly-maps-using-ggplot2-in-r
 ```
-

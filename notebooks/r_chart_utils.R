@@ -104,7 +104,8 @@ plotVaxHTML<-function(df, chart_title){
                   )) +
     labs(x = "date", 
          y = "percent", 
-         title=eval(arg$chart_title)) + 
+         title=eval(arg$chart_title), 
+         tooltip=c("county", "date", "pct_fully_vax", "pct_partial_vax")) + 
     geom_line() +
     scale_color_calc() +
     scale_x_date(date_labels = "%m-%d", 
@@ -112,9 +113,7 @@ plotVaxHTML<-function(df, chart_title){
     scale_y_continuous(label=comma) + 
     ylim(0, 1.0) +
     theme_minimal() +
-    theme(legend.position = "none",
-      axis.text.x = element_text(angle=90, hjust=0)
-          )
+    theme(axis.text.x = element_text(angle=90, hjust=0))
   
   return(chart)
 }
