@@ -94,8 +94,10 @@ plotDeathsHTML<-function(df, chart_title){
 }
 
 
-plotVaxHTML<-function(df, chart_title){
+plotVaxHTML<-function(df){
   arg <- match.call()
+
+  chart_title = paste0(df$demographic_category[1])
   
   chart <- ggplot(df %>% subset(variable == "pct_fully_vax"), 
                   aes(x = date, 
@@ -104,8 +106,8 @@ plotVaxHTML<-function(df, chart_title){
                   )) +
     labs(x = "date", 
          y = "percent", 
-         title=eval(arg$chart_title), 
-         tooltip=c("county", "date", "pct_fully_vax", "pct_partial_vax")) + 
+         title=chart_title
+         ) + 
     geom_line() +
     scale_color_calc() +
     scale_x_date(date_labels = "%m-%d", 

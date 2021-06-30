@@ -72,8 +72,8 @@ prep_vaccinations <- function(df, county_name){
            fully_vax = cumulative_fully_vaccinated) %>%
     arrange(county, date) %>%
     mutate(
-      pct_partial_vax = round(partial_vax / est_age_12plus_pop, 3),
-      pct_fully_vax = round(fully_vax / est_age_12plus_pop, 3)
+      pct_partial_vax = round(partial_vax / est_population, 3),
+      pct_fully_vax = round(fully_vax / est_population, 3)
     ) 
   
   return(df)

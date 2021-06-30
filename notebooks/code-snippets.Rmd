@@ -1,0 +1,34 @@
+
+
+```{r loop-charts, echo = FALSE, results = 'asis', fig.width = 20, fig.height = 100}
+county_list = c("Los Angeles")
+
+# Loop makes ggplotly disappear as output
+# https://github.com/ropensci/plotly/issues/570
+plotlist = list()
+for (c in county_list) {
+    race_chart <- plot_charts(ca_vaccinations, c, "Race/Ethnicity") 
+    age_chart <- plot_charts(ca_vaccinations, c, "Age Group") 
+    vem_chart <- plot_charts(ca_vaccinations, c, "VEM Quartile") 
+    
+    # Options for side-by-side
+    #https://stackoverflow.com/questions/1249548/side-by-side-plots-with-ggplot2
+    #Cleanest ex: https://github.com/ropensci/plotly/issues/570
+    #If we use subplot, then chart can only have 1 title
+    # Each subplot must use annotation to get its own title
+    #https://stackoverflow.com/questions/45200544/title-of-subplots-in-plotly
+    chart <- subplot(race_chart, age_chart, vem_chart, 
+                     nrows=3) %>% 
+      layout(title = paste(c, "County: Proportion Fully Vaccinated by Subgroups"))
+   
+    plotlist[[c]] = ggplotly(chart) 
+    
+}
+htmltools::tagList(setNames(plotlist, NULL))
+```
+
+
+```{r , echo = FALSE}
+#As of `r YESTERDAY_DATE`, there have been `r comma(subset_df$cases)` cumulative cases and `r #comma(subset_df$deaths)` cumulative deaths in `r params$county` County.
+#https://stackoverflow.com/questions/38733403/edit-labels-in-tooltip-for-plotly-maps-using-ggplot2-in-r
+```
