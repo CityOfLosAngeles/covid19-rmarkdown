@@ -105,7 +105,7 @@ plotVaxHTML<-function(df){
                       color = demographic_value
                   )) +
     labs(x = "date", 
-         y = "percent", 
+         y = "proportion", 
          title=chart_title
          ) + 
     geom_line() +

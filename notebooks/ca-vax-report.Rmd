@@ -170,6 +170,7 @@ write_caption <- function(df, county, chart_type){
 county_list <- c("Los Angeles", "Alameda") 
 
 for (c in county_list) {
+
   county_df <- wrangle_data(ca_vaccinations, c)
   # Add this newline so that the Markdown headers display properly
   cat("\n")
@@ -185,7 +186,7 @@ for (c in county_list) {
   caption <- write_caption(county_df, c, "Race/Ethnicity")
   
   chart <- plot_charts(county_df, c, "Race/Ethnicity")
-  qplot(print(ggplotly(chart)))
+  qplot(print(chart))
   #plotlist[["race"]] = ggplotly(chart)
   print(table)
   print(caption)
@@ -193,6 +194,13 @@ for (c in county_list) {
   
   #qplot(print(htmltools::tagList(setNames(plotlist, NULL))))
 }
+
+# Need to keep it outside loop 
+# Skim GH issue for more discussion: https://github.com/ramnathv/htmlwidgets/pull/110
+# https://www.r-bloggers.com/2020/07/programmatically-create-new-headings-and-outputs-in-rmarkdown/
+
+# https://stackoverflow.com/questions/43124424/how-to-use-htmltoolstaglist-such-that-headers-show-in-rmarkdown-table-of-conte
+htmltools::tagList(setNames(plotlist, NULL))
   
 ```
 ```TEST 
