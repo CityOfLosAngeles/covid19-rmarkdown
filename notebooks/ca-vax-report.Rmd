@@ -46,45 +46,29 @@ library(htmltools) #for ggplotly to work with loop
 COUNTY_DEMOGRAPHICS_URL = "https://data.chhs.ca.gov/dataset/e283ee5a-cf18-4f20-a92c-ee94a2866ccd/resource/71729331-2f09-4ea4-a52f-a2661972e146/download/covid19vaccinesbycountybydemographic.csv"
 ca_vaccinations<-read.csv(COUNTY_DEMOGRAPHICS_URL)
 
-#vaccines<- ca_vaccinations %>%
-#  subset(county=="Los Angeles")
-
 
 #ca_hospitalizations<-read.csv("https://raw.githubusercontent.com/CityOfLosAngeles/covid19-indicators/master/data/ca-hospital-and-surge-capacity.csv")
 
 # Call parameters from our utils file
 source("../notebooks/r_utils.R")
 YESTERDAY_DATE <-YESTERDAY_DATE
+TWO_WEEKS_AGO <- TWO_WEEKS_AGO
 ```
 
 
 ```{r chart-functions, echo=FALSE, out.width=c("50%", "50%")}
 # chart_types = c("Age Group", "Race/Ethnicity", "VEM Quartile")
-plot_charts <- function(df, county, chart_type="Race/Ethnicity"){
-  source("../notebooks/r_utils.R")
-  
-  vax_df <- prep_vaccinations(df, county)
-  
-  
-  source("../notebooks/r_chart_utils.R")
-  subset_df <- vax_df %>% 
-    subset(demographic_category==chart_type) %>%
-    reshape2::melt(id.vars = c("county", "date",
-                               "demographic_category", "demographic_value"), 
-                   measure.vars = c("pct_partial_vax", "pct_fully_vax"),
-                   value.name="pct")
-  
-  chart_title <- subset_df[1, "demographic_category"]
+plot_charts <- function(df, county, chart_type){
+  title <- df[1, "demographic_category"]
 
-  chart_html <- plotVaxHTML(subset_df, chart_title=chart_title)
+  chart_html <- plotVaxHTML(df, chart_title=title)
   
   return(chart_html)
   
 }
 
 
-
-plot_charts <- function(df, county, chart_type){
+plot_charts2 <- function(df, county, chart_type){
   subset_df <- wrangle_data(df, county) %>%
     subset(demographic_category==chart_type)
   
@@ -113,7 +97,7 @@ wrangle_data <-function(df, county){
                    measure.vars = c("pct_partial_vax", "pct_fully_vax"),
                    value.name="pct")
 
-  return(subset_df)
+  return(vax_df)
 }
 
 
@@ -125,51 +109,79 @@ grab_vax_pct <- function(df, demog_value, var){
     return(pct)
 }
 
-# Programmatically write captions
-# https://urban-institute.medium.com/using-r-markdown-to-track-and-publish-state-data-d1291bfa1ec0
-write_caption <- function(df){
-  subset_df <- wrangle_data(df, "Los Angeles") %>% subset(date==YESTERDAY_DATE)
-  
-  race_sentence <- str_glue("As of {YESTERDAY_DATE} in {county} County, ",
-                            "the race/ethnicity breakdown for fully vaccinated (partially vaccinated) is: ",
-                            "{white}% of whites ({white2}%), ",
-                            "{black}% of Blacks ({black2}%), ",
-                            "{asian}% of Asians ({asian2}%), ",
-                            "{latino}% of Latinos ({latino2}%). ",
-                            county = subset_df$county,
-                            white = grab_vax_pct(subset_df, "White", "pct_fully_vax"),
-                            black = grab_vax_pct(subset_df, "Black or African American", "pct_fully_vax"),
-                            asian = grab_vax_pct(subset_df, "Asian", "pct_fully_vax"),
-                            latino = grab_vax_pct(subset_df, "Latino", "pct_fully_vax"),
-                            white2 = grab_vax_pct(subset_df, "White", "pct_partial_vax"),
-                            black2 = grab_vax_pct(subset_df, "Black or African American", "pct_partial_vax"),
-                            asian2 = grab_vax_pct(subset_df, "Asian", "pct_partial_vax"),
-                            latino2 = grab_vax_pct(subset_df, "Latino", "pct_partial_vax")
-                      )
-  
-  age_sentence <- str_glue("The age group breakdown is: ",
-                           "{y65}% of 65+ yrs ({y65p}%), ",
-                           "{y50}% of 50-64 yrs ({y50p}%), ",
-                           "{y18}% of 18-49 yrs ({y18p}%), ",
-                           "{y12}% of 12-17 yrs ({y12p}%). ",
-                           y65 = grab_vax_pct(subset_df, "65+", "pct_fully_vax"),
-                           y50 = grab_vax_pct(subset_df, "50-64", "pct_fully_vax"),
-                           y18 = grab_vax_pct(subset_df, "18-49", "pct_fully_vax"),
-                           y12 = grab_vax_pct(subset_df, "12-17", "pct_fully_vax"),
-                           y65p = grab_vax_pct(subset_df, "65+", "pct_partial_vax"),
-                           y50p = grab_vax_pct(subset_df, "50-64", "pct_partial_vax"),
-                           y18p = grab_vax_pct(subset_df, "18-49", "pct_partial_vax"),
-                           y12p = grab_vax_pct(subset_df, "12-17", "pct_partial_vax")
-                      )
-  
+format_table <- function(df, county, chart_type){
+  source("../notebooks/r_utils.R")
 
-  caption <- paste0(race_sentence, age_sentence)[1]
+  table <- prep_vaccinations(df, county) %>% 
+    subset(date==TWO_WEEKS_AGO & demographic_category==chart_type) %>%
+    select(c("demographic_value", "pct_partial_vax", "pct_fully_vax")) %>%
+    mutate(
+      pct_partial_vax = round(pct_partial_vax * 100, 1),
+      pct_fully_vax = round(pct_fully_vax * 100, 1)
+    ) 
   
-  return(caption)
+  
+  summary_table <- kable(table, 
+                         col.names = c(
+                           "Category", "% Partial Vax", "% Full Vax"),
+                         align = c("l", "c", "c") ) %>%
+    kable_paper(full_width = F) %>%
+    column_spec(1, width="6cm") %>%
+    column_spec(2, width="3cm") %>%
+    column_spec(3, width="3cm") %>%
+    kable_styling(fixed_thead = T, position="left") %>%
+    row_spec(0, bold = T)
+
+  return(summary_table)
 }
 
 
-write_caption(ca_vaccinations)
+# Programmatically write captions
+# https://urban-institute.medium.com/using-r-markdown-to-track-and-publish-state-data-d1291bfa1ec0
+write_caption <- function(df, county, chart_type){
+  subset_df <- wrangle_data(df, county) %>% subset(date==TWO_WEEKS_AGO)
+  
+  race_sentence <- str_glue("The white-Black gap in for full vaccinations is {white-black}%.",
+                            white = grab_vax_pct(subset_df, "White", "pct_fully_vax"),
+                            black = grab_vax_pct(subset_df, "Black or African American", "pct_fully_vax")
+                            )
+  
+  age_sentence <- str_glue("For the highest risk age group (65+ yrs), ", 
+                           "{100-y65}% are **not** yet fully vaccinated.",
+                           y65 = grab_vax_pct(subset_df, "65+", "pct_fully_vax")
+                           )
+  
+  vem_sentence <- str_glue("The gap between highest Vaccine Equity Metric (VEM) quartile ",
+                           "and the lowest VEM quartile is {vem4 - vem1}%.",
+                           vem4 = grab_vax_pct(subset_df, "4", "pct_fully_vax"),
+                           vem1 = grab_vax_pct(subset_df, "1", "pct_fully_vax")
+                          )
+  
+  if (chart_type=="Race/Ethnicity") {
+    return(race_sentence[1])
+  }
+  if (chart_type=="Age Group") {
+    return(age_sentence[1])
+  }
+  if (chart_type=="VEM Quartile") {
+    return(vem_sentence[1])
+  }
+}
+
+
+plot_county_chart <- function(df, county) {
+  county_df <- wrangle_data(df, county)
+
+  chart<-plot_charts(county_df, county, "Race/Ethnicity")
+  #table<-format_table(county_df, county, "Race/Ethnicity")
+  #caption<-write_caption(county_df, county, "Race/Ethnicity")
+  print(chart)
+}
+
+county_list = c("Los Angeles")
+for (c in county_list) {
+  plot_county_chart(ca_vaccinations, c)
+}
 ```
 
 
